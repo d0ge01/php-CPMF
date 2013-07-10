@@ -6,7 +6,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	$email = $_REQUEST['email'];
 	$passw = $_REQUEST['password'];
 	
-	$out = exec("ruby system/prova.rb \"$email\" \"$passw\"");
+	$out = exec("ruby system/acceptlogin.rb \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
 		$authorized = true;
