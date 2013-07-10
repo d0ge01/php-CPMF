@@ -2,10 +2,10 @@
 require 'sqlite3'
 require 'socket'
 class CaptivePortal
-  attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :nIpAllowed, :nIpBanned, :server
+  attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :nIpAllowed, :nIpBanned, :server, :db
   def initialize(port)
     self.allowedDB = []  # Array that contains all ip allowed
-    self.deniedDB = []   # Array that contains all banned ip
+    self.deniedDB = ["192.168.1.1","127.0.0.1","193.44.44.55"]   # Array that contains all banned ip
 	self.blockConnection
     self.port = port.to_i
     self.nIpAllowed = 0
@@ -37,7 +37,7 @@ class CaptivePortal
   end
   def checkLogin(email, password)
 	Thread.new do
-		str = @db.prepare "SELECT * FROM logindata WHERE email='#{email}' AND password='#{password}'"
+		str = self.db.prepare "SELECT * FROM logindata WHERE email='#{email}' AND password='#{password}'"
 		rs = stm.execute
 	end
   end
@@ -64,6 +64,9 @@ class CaptivePortal
 			else
 				client.puts "FAIL"
 			end
+		end
+		if data.first == "ipbanned"
+			client.puts self.deniedDB.join(' </br>')
 		end
 		client.close                # Disconnect from the client
 	  end

@@ -32,12 +32,30 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
   <?php
     if ( $authorized )
     {
+	  echo "<a href='javascript:$(\"#statusbox\").toggle(\"slow\")'>Status</a></br>";
+	  echo "<div id='statusbox'>";
       $out = Array();
 	  exec("ruby system/acceptlogin.rb status", $out);
 	  foreach($out as $line)
 	  {
 		echo $line;
 	  }
+	  echo "</div>";
+	  unset($out);
+	  $out = Array();
+	  echo "<a href='javascript:$(\"#ipBanned\").toggle(\"slow\")'>ip Banned</a>";
+	  echo "<div id='ipBanned'>";
+	  exec("ruby system/acceptlogin.rb ipbanned", $out);
+	  foreach($out as $line)
+	  {
+		echo $line;
+	  }
+	  echo "</div><script>
+		$(\"#statusbox\").hide();
+		$(\"#ipBanned\").hide();
+	  </script>";
+	  
+	  
     }else{
       echo '
           <center> Autenticazione necessaria... </center>
