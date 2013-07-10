@@ -5,16 +5,26 @@ class CaptivePortal
   attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :nIpAllowed, :nIpBanned, :server, :db
   def initialize(port)
     self.allowedDB = []  # Array that contains all ip allowed
-    self.deniedDB = ["192.168.1.1","127.0.0.1","193.44.44.55"]   # Array that contains all banned ip
+    self.deniedDB = []   # Array that contains all banned ip
 	self.blockConnection
     self.port = port.to_i
     self.nIpAllowed = 0
     self.nIpBanned = 0
 	self.active = false;
 	self.iptables_bin = "/sbin/ipables"
-	
+	self.loadDB
+	self.createTable
 	# Always last line of initialize.
 	self.listenAsk
+  end
+  def loadDB
+	self.db = SQLite3::Database.open "login.db"
+  end
+  def createTable
+	self.db.execute "CREATE TABLE IF NOT EXISTS logindata (email TEXT, password TEXT, Id INTEGER PRIMARY KEY AUTOINCREMENT)"
+  end
+  def addUser(email, password)
+    self.db.execute "INSERT INTO logindata VALUES('#{email}','#{password}',null)"
   end
   def blockConnection
 	system("#{self.iptables_bin} -A PREROUTING -i #{self.interface} -m tcp -s #{self.network_lan} --dport 80 -j REDIRECT --to-ports 3128 ");
@@ -36,9 +46,12 @@ class CaptivePortal
     end
   end
   def checkLogin(email, password)
-	Thread.new do
-		str = self.db.prepare "SELECT * FROM logindata WHERE email='#{email}' AND password='#{password}'"
-		rs = stm.execute
+	str = self.db.prepare "SELECT * FROM logindata WHERE email='#{email}' AND password='#{password}'"
+	rs = stm.execute
+	if rs.size == 0
+		return false
+	else
+		return true
 	end
   end
   def status
@@ -59,7 +72,7 @@ class CaptivePortal
 			client.puts self.status
 		end
 		if data.first == "login"
-			if data[1] == 'pippo' and data[2] == "12345"
+			if(self.checkLogin(data[1],data[2]))
 				client.puts "OK"
 			else
 				client.puts "FAIL"
@@ -67,6 +80,14 @@ class CaptivePortal
 		end
 		if data.first == "ipbanned"
 			client.puts self.deniedDB.join(' </br>')
+		end
+		if data.first == "exit"
+			if data[1] == "helloworld"
+				exit
+			end
+		end
+		if data.first == "register"
+			self.addUser(data[1],data[2])
 		end
 		client.close                # Disconnect from the client
 	  end
