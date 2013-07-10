@@ -1,5 +1,5 @@
 #!/usb/bin/env ruby
-
+require 'sqlite3'
 
 class CaptivePortal
   attr_accessor :active, :port, :nIpAllowed, :nIpBanned
@@ -10,9 +10,11 @@ class CaptivePortal
     self.port = port.to_i
     self.nIpAllowed = 0
     self.nIpBanned = 0
-
     self.addServerActive
-  end
+
+
+	@iptables_bin = "/sbin/ipables"
+	end
 
   def addNewIpAllowed(ip)
     @allowedDB << ip

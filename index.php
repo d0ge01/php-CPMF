@@ -1,45 +1,19 @@
 <?php
-// Stringhe
-$strErrorDb = "Errore nella connessione o gestione database...</br>";
-$strAuthor = "Salvatore Criscione";
-$strName = "CPMF";
-
-// Variabili
-//
-//
-$authorized = false;
 $logged = false;
-
-if ( !isset($_REQUEST['email']) && !isset($_REQUEST['password']))
+$authorized = false;
+if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
-  $authorized = false;
-}
-else
-{
-  $authorized = true;
-}
-
-
-if ($authorized)
-{
-  $sq = sqlite_open("login.db", 0666, $sqlite_error);
-  if(!$sq)
-  {
-    die($strErrorDb . $sqlite_error );
-  }
-  $result = sqlite_query($sq, "SELECT * FROM logindata WHERE utente=". $_REQUEST['email'] . " AND password=" . $_REQUEST['password']);
-
-  $i = 0;
-  while ( $data = sqlite_fetch_array($result))
-  {
-    $i++;
-  }
-  if ( $i == 0 )
-  {
-    $logged = true;
-  }else{
-    $logged = false;
-  }
+	$email = $_REQUEST['email'];
+	$passw = $_REQUEST['password'];
+	
+	$out = exec("ruby system/prova.rb \"$email\" \"$passw\"");
+	if ( $out == "OK" )
+	{
+		$authorized = true;
+	}
+	else {
+		$authorized = false;
+	}
 }
 ?>
 
@@ -74,7 +48,7 @@ if ($authorized)
               <input type="password" name="password"></br>
               <input type="submit" value="Login">
             </form>
-          </div>';
+          </div></center>';
    }
   ?>
 </body>
