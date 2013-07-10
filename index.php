@@ -6,7 +6,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	$email = $_REQUEST['email'];
 	$passw = $_REQUEST['password'];
 	
-	$out = exec("ruby system/acceptlogin.rb \"$email\" \"$passw\"");
+	$out = exec("ruby system/acceptlogin.rb login \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
 		$authorized = true;
@@ -32,13 +32,12 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
   <?php
     if ( $authorized )
     {
-      echo "
-            <center>
-            Non dovresti essere più su questa pagina, in ogni caso se continui a visualizzarla premi
-            <a href='http://www.google.com'>qua</a>.
-            </center>
-           ";
-
+      $out = Array();
+	  exec("ruby system/acceptlogin.rb status", $out);
+	  foreach($out as $line)
+	  {
+		echo $line;
+	  }
     }else{
       echo '
           <center> Autenticazione necessaria... </center>
