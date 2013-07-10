@@ -2,36 +2,40 @@
 require 'sqlite3'
 
 class CaptivePortal
-  attr_accessor :active, :port, :nIpAllowed, :nIpBanned
+  attr_reader :active, :nIpAllowed, :nIpBanned
+  attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB
   def initialize(port)
-    @allowedDB = []  # Array that contains all ip allowed
-    @deniedDB = []   # Array that contains all banned ip
+    self.allowedDB = []  # Array that contains all ip allowed
+    self.deniedDB = []   # Array that contains all banned ip
 
     self.port = port.to_i
     self.nIpAllowed = 0
     self.nIpBanned = 0
     self.addServerActive
-
-
-	@iptables_bin = "/sbin/ipables"
-	end
+	self.iptables_bin = "/sbin/ipables"
+  end
 
   def addNewIpAllowed(ip)
-    @allowedDB << ip
+    self.allowedDB << ip
     self.nIpAllowed += 1
     Thread.new do
-      `#{@iptables_bin} -s #{ip}`
+      `#{self.iptables_bin} -s #{ip}`
     end
   end
 
   def banNewIpAllowed(ip)
-    @deniedDB << ip
+    self.deniedDB << ip
     self.nIpBanned += 1
     Thread.new do
       self.deban(ip)
     end
   end
-
+  def checkLogin(email, password)
+	Thread.new do
+		str = @db.prepare "SELECT * FROM logindata WHERE email='#{email}' AND password='#{password}'"
+		rs = stm.execute
+	end
+  end
   def status
     puts "Status: #{self.active} </br>\n "
     puts "Ip Banned: #{self.nIpBanned}</br>\n"
@@ -41,7 +45,7 @@ class CaptivePortal
 
   def deban(ip)
     sleep 60*60 # 1 hours
-    @deniedDB = @deniedDB - [ ip ]
+    self.deniedDB = self.deniedDB - [ ip ]
     self.nIpBanned -= 1
   end
 end
