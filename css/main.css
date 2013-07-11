@@ -1,0 +1,16 @@
+body {
+	background-color:				#000000;
+	color:							#808080;
+}
+
+a {
+	color:							green;
+	text-decoration:				none;
+	
+}
+
+.box {
+	border:							dotted 1px green;
+	width:							430px;
+	text-align:						left;
+}
