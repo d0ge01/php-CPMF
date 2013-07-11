@@ -57,7 +57,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "</div>";
 	  unset($out);
 	  $out = Array();
-	  echo "<a href='javascript:$(\"#ipBanned\").toggle(\"slow\")'>ip Banned</a>";
+	  echo "<a href='javascript:$(\"#ipBanned\").toggle(\"slow\")'>ip Banned</a></br>";
 	  echo "<div id='ipBanned' class='box'>";
 	  echo "Lista ip bannati: </br>- ";
 	  exec("ruby system/acceptlogin.rb ipbanned", $out);
@@ -79,6 +79,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<script>
 		$(\"#statusbox\").hide();
 		$(\"#ipBanned\").hide();
+		$(\"#control\").hide();
 	  </script>";
 	  
     }else{
