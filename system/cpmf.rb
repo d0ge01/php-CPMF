@@ -4,9 +4,8 @@ require 'socket'
 require 'digest'
 
 # Salvatore Criscione <salvatore@grrlz.net>
-
 class CaptivePortal
-  attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug
+  attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password
   def initialize(port, debug)
     self.allowedDB = []  # Array that contains all ip allowed
     self.deniedDB = ["192.168.1.1","127.0.0.1","10.10.10.10"]   # Array that contains all banned ip
@@ -15,6 +14,7 @@ class CaptivePortal
     self.port = port.to_i
 	self.active = false;
 	self.iptables_bin = "/sbin/ipables"
+	self.password = "helloworld"
 	
 	if self.debug
 		puts "Informazioni di debug abilitate..."
@@ -112,10 +112,11 @@ class CaptivePortal
 		data = client.recv(1024)
 		puts "[!] Data received: #{data}" if self.debug
 		data = data.split(' ')
-		if data.size > 1
-			data[1] = data[1].replace('\'','')
-			data[2] = data[2].replace('\'','')
-		end
+		#if data.size > 1 # Wait for a fix , freeze all
+		#	data[1] = data[1].replace('\'','')
+		#	data[2] = data[2].replace('\'','')
+		#end
+		#data.first.lowercase!
 		if data.first == "status"
 			puts "[!] sending status to client" if self.debug
 			client.puts self.status
@@ -137,13 +138,15 @@ class CaptivePortal
 		end
 		
 		if data.first == "exit"
-			if data[1] == "helloworld"
+			if data[1] == self.password
 				exit
 			end
 		end
-		
+				
 		if data.first == "register"
-			self.addUser(data[1],data[2])
+			if data.size >= 2
+				self.addUser(data[1],data[2])
+			end
 		end
 		
 		if data.first == "deactivate"
@@ -157,11 +160,11 @@ class CaptivePortal
 	  end
 	}
   end
-  
-  def deban(ip)
+
+  def deban
     sleep 60*60 # 1 hours
-    self.deniedDB = self.deniedDB - [ ip ]
-    self.nIpBanned -= 1
+    self.deniedDB = []
+	#self.rebuildDB
   end
   
   def error(txt)
