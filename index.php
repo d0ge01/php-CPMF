@@ -3,8 +3,8 @@ $logged = false;
 $authorized = false;
 if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
-	$email = $_REQUEST['email'];
-	$passw = $_REQUEST['password'];
+	$email = mysql_real_escape_string($_REQUEST['email']);
+	$passw = mysql_real_escape_string($_REQUEST['password']);
 	$out = exec("ruby system/acceptlogin.rb login \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
