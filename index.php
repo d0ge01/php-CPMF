@@ -3,8 +3,8 @@ $logged = false;
 $authorized = false;
 if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
-	$email = mysql_real_escape_string($_REQUEST['email']);
-	$passw = mysql_real_escape_string($_REQUEST['password']);
+	$email = $_REQUEST['email'];
+	$passw = $_REQUEST['password'];
 	$out = exec("ruby system/acceptlogin.rb login \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
@@ -34,7 +34,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Captive Portal Authentication</title>
+  <title>Captive Portal Control Panel</title>
   <script src="system/jquery.js"></script>
   <script src="system/main.js"></script>
 
@@ -46,42 +46,13 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
   <?php
     if ( $authorized )
     {
-	  echo "<a href='javascript:$(\"#statusbox\").toggle(\"slow\")'>Status</a></br>";
-	  echo "<div id='statusbox' class='box'>";
-      $out = Array();
-	  exec("ruby system/acceptlogin.rb status", $out);
-	  foreach($out as $line)
-	  {
-		echo $line;
-	  }
-	  echo "</div>";
-	  unset($out);
-	  $out = Array();
-	  echo "<a href='javascript:$(\"#ipBanned\").toggle(\"slow\")'>ip Banned</a></br>";
-	  echo "<div id='ipBanned' class='box'>";
-	  echo "Lista ip bannati: </br>- ";
-	  exec("ruby system/acceptlogin.rb ipbanned", $out);
-	  foreach($out as $line)
-	  {
-		echo $line;
-	  }
-	  echo "</div>";
-	  echo "<a href='javascript:$(\"#control\").toggle(\"slow\")'>Control Panel</a>";
-	  echo "<div id='control' class='box'>";
-	  echo "<table><tr><td><form method='post'><input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
-			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'>
-			<input type='hidden' name='action' value='off'><input type='submit' value='Spegni'></form></td>
-			<td><form method='post'><input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
-			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'>
-			<input type='hidden' name='action' value='on'><input type='submit' value='Accendi'></form></td>
-			</tr></table>";
-	  
+	  echo "Non dovresti più vedere questa pagina...</br>";
 	  echo "<script>
-		$(\"#statusbox\").hide();
-		$(\"#ipBanned\").hide();
-		$(\"#control\").hide();
-	  </script>";
-	  
+				function redirect() {
+					window.location.href = 'https://www.google.com';
+				}
+				setTimeout(\"redirect()\", 4000);
+			</script>";
     }else{
       echo '
           <center> Autenticazione necessaria... </center>

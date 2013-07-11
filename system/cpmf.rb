@@ -112,6 +112,10 @@ class CaptivePortal
 		data = client.recv(1024)
 		puts "[!] Data received: #{data}" if self.debug
 		data = data.split(' ')
+		if data.size > 1
+			data[1] = data[1].replace('\'','')
+			data[2] = data[2].replace('\'','')
+		end
 		if data.first == "status"
 			puts "[!] sending status to client" if self.debug
 			client.puts self.status
