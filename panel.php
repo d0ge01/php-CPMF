@@ -6,7 +6,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
 	$email = $_REQUEST['email'];
 	$passw = $_REQUEST['password'];
-	$out = exec("ruby system/acceptlogin.rb login \"$email\" \"$passw\"");
+	$out = exec("ruby system/handler.rb login \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
 		if ( $email == $adminMail )
@@ -28,11 +28,15 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 			$action = $_REQUEST['action'];
 			if ( $action == "off" )
 			{
-				exec("ruby system/acceptlogin.rb deactivate");
+				exec("ruby system/handler.rb power");
 			}
-			if ( $action == "on" )
+			if ( $action == "banip" && isset($_REQUEST['ban_ip']))
 			{
-				exec("ruby system/acceptlogin.rb activate");
+				$ip = $_REQUEST['ban_ip'];
+				if ( $ip != "" ) 
+				{
+					exec("ruby system/handler.rb banip $ip");
+				}
 			}
 		}
 	}		
@@ -57,7 +61,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<a href='javascript:$(\"#statusbox\").toggle(\"slow\")'>Status</a></br>";
 	  echo "<div id='statusbox' class='box'>";
       $out = Array();
-	  exec("ruby system/acceptlogin.rb status", $out);
+	  exec("ruby system/handler.rb status", $out);
 	  foreach($out as $line)
 	  {
 		echo $line;
@@ -68,7 +72,17 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<a href='javascript:$(\"#ipBanned\").toggle(\"slow\")'>ip Banned</a></br>";
 	  echo "<div id='ipBanned' class='box'>";
 	  echo "Lista ip bannati: </br>- ";
-	  exec("ruby system/acceptlogin.rb ipbanned", $out);
+	  exec("ruby system/handler.rb ipbanned", $out);
+	  foreach($out as $line)
+	  {
+		echo $line;
+	  }
+	  echo "</div>";
+	  echo "<a href='javascript:$(\"#ipAllowed\").toggle(\"slow\")'>ip Allowed</a></br>";
+	  echo "<div id='ipAllowed' class='box'>";
+	  echo "Lista ip permessi: </br>- ";
+	  $out = Array();
+	  exec("ruby system/handler.rb ipallowed", $out);
 	  foreach($out as $line)
 	  {
 		echo $line;
@@ -79,15 +93,20 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<table><tr><td><form method='post'><input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
 			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'>
 			<input type='hidden' name='action' value='off'><input type='submit' value='Spegni'></form></td>
-			<td><form method='post'><input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
+			</tr></table>
+			<table><tr><td><form method='post'><input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
 			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'>
-			<input type='hidden' name='action' value='on'><input type='submit' value='Accendi'></form></td>
+			<input type='hidden' name='action' value='banip'>
+			<tr>
+			<td colspan='2'>Banna Ip:</td>
+			<td><input type='text' name='ban_ip'></td>
 			</tr></table>";
 	  
 	  echo "<script>
 		$(\"#statusbox\").hide();
 		$(\"#ipBanned\").hide();
 		$(\"#control\").hide();
+		$(\"#ipAllowed\").hide();
 	  </script>";
 	  
     }else{

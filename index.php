@@ -5,10 +5,11 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
 	$email = $_REQUEST['email'];
 	$passw = $_REQUEST['password'];
-	$out = exec("ruby system/acceptlogin.rb login \"$email\" \"$passw\"");
+	$out = exec("ruby system/handler.rb login \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
 		$authorized = true;
+		exec("ruby system/handler.rb autorize " . $_SERVER['REMOTE_ADDR'] );
 	}
 	else {
 		$authorized = false;
@@ -20,11 +21,11 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 			$action = $_REQUEST['action'];
 			if ( $action == "off" )
 			{
-				exec("ruby system/acceptlogin.rb deactivate");
+				exec("ruby system/handler.rb deactivate");
 			}
 			if ( $action == "on" )
 			{
-				exec("ruby system/acceptlogin.rb activate");
+				exec("ruby system/handler.rb activate");
 			}
 		}
 	}		

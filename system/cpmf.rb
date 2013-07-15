@@ -8,7 +8,7 @@ class CaptivePortal
   attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password
   def initialize(port, debug)
     self.allowedDB = []  # Array that contains all ip allowed
-    self.deniedDB = ["192.168.1.1","127.0.0.1","10.10.10.10"]   # Array that contains all banned ip
+    self.deniedDB = []   # Array that contains all banned ip
 	self.blockConnection
 	self.debug = debug == "true" ? true : false
     self.port = port.to_i
@@ -137,6 +137,16 @@ class CaptivePortal
 			client.puts self.deniedDB.join(' </br>- ')
 		end
 		
+		if data.first == "ipallowed"
+			client.puts self.allowedDB.join(' </br>- ')
+		end
+		
+		if data.first == "banip"
+			deniedDB << data[1].to_s
+			puts "#{data[1]} ip banned..." if self.debug
+			client.puts "#{data[1]} ip banned..."
+		end
+		
 		if data.first == "exit"
 			if data[1] == self.password
 				exit
@@ -149,18 +159,34 @@ class CaptivePortal
 			end
 		end
 		
-		if data.first == "deactivate"
-			self.active = false
+		if data.first == "power"
+			self.active = not(self.active)
 		end
 		
-		if data.first == "activate"
-			self.active == true
+		if data.first == "autorize"
+			if ( data[1] != "" )
+			
+				self.autorize(data[1])
+				client.puts "OKS"
+			else
+				client.puts "ZERO"
+			end
 		end
+		
+		if data.first == "reset"
+			puts "[!!!11] SOMEONE WANT DO RESET OMG"
+			self.deniedDB = []
+			self.allowedDB= []
+		end
+
 		client.close                # Disconnect from the client
 	  end
 	}
   end
-
+  def autorize(ip)
+	self.allowedDB << ip
+	# self.allowConnection(ip)
+  end
   def deban
     sleep 60*60 # 1 hours
     self.deniedDB = []
