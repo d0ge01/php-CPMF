@@ -184,7 +184,7 @@ class CaptivePortal
 		end
 		
 		if data.first == "power"
-			self.active = not(self.active)
+			self.active = ! self.active
 		end
 		
 		if data.first == "autorize"
