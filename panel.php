@@ -1,22 +1,14 @@
 <?php
 $logged = false;
 $authorized = false;
-$adminMail = "admin";
 if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
 	$email = $_REQUEST['email'];
 	$passw = $_REQUEST['password'];
-	$out = exec("ruby system/handler.rb login \"$email\" \"$passw\"");
+	$out = exec("ruby system/handler.rb adminlogin \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
-		if ( $email == $adminMail )
-		{
-			$authorized = true;
-		}
-		else
-		{
-			$authorized = false;
-		}
+		$authorized = true;
 	}
 	else {
 		$authorized = false;

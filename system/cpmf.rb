@@ -5,7 +5,9 @@ require 'digest'
 
 # Salvatore Criscione <salvatore@grrlz.net>
 class CaptivePortal
+
   attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password
+  
   def initialize(port, debug)
     self.allowedDB = []  # Array that contains all ip allowed
     self.deniedDB = []   # Array that contains all banned ip
@@ -17,12 +19,12 @@ class CaptivePortal
 	self.password = "helloworld"
 	
 	if self.debug
-		puts "Informazioni di debug abilitate..."
+		puts "[+] Informazioni di debug abilitate..."
 	end
-	
 	
 	self.loadDB
 	self.createTable
+	
 	# Always last line of initialize.
 	self.listenAsk
   end
@@ -86,6 +88,17 @@ class CaptivePortal
 	end
   end
   
+  def checkLoginAdmin(email, password)
+	puts "[!] Login checker activated: email = #{email} , password = #{password}" if self.debug
+	rs = self.db.execute"SELECT * FROM logindata WHERE email='#{email}' AND password='#{Digest::MD5.hexdigest(password).to_s}' AND id='1'"
+	puts "Returned #{rs.size} rows.." if self.debug
+	if rs.size == 0
+		return false
+	else
+		return true
+	end
+  end
+  
   def status
 	buff = ""
 	if self.active
@@ -103,7 +116,7 @@ class CaptivePortal
 	begin
 		self.server = TCPServer.open(self.port)
 	rescue
-		self.error('server start error')
+		self.error('[-] server start error')
 	end
 	puts "[+] Server started on port: #{self.port}"
 	self.active = true;
@@ -124,6 +137,17 @@ class CaptivePortal
 		
 		if data.first == "login"
 			if(self.checkLogin(data[1],data[2]))
+				puts "[!] Login OK" if self.debug
+				client.puts "OK"
+			else
+				puts "[!] Login FAIL" if self.debug
+				client.puts "FAIL"
+			end
+			client.puts "END"
+		end
+		
+		if data.first == "adminlogin"
+			if(self.checkLoginAdmin(data[1],data[2]))
 				puts "[!] Login OK" if self.debug
 				client.puts "OK"
 			else
