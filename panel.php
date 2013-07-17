@@ -30,6 +30,16 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 					exec("ruby system/handler.rb banip $ip");
 				}
 			}
+			
+			if ( $action == "register" && isset($_REQUEST['name_reg']) && isset($_REQUEST['pass_reg']))
+			{
+				$name = $_REQUEST['name_reg'];
+				$pass = $_REQUEST['pass_reg'];
+				if ( $name != "" )
+				{
+					exec("ruby system/handler.rb register $name $pass");
+				}
+			}
 		}
 	}		
 }
@@ -92,7 +102,17 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 			<tr>
 			<td colspan='2'>Banna Ip:</td>
 			<td><input type='text' name='ban_ip'></td>
-			</tr></table>";
+			</tr></table></form></br>
+			<form method='post'><input type='hidden' name='action' value='register'></br>New User</br>
+			<table><tr>
+			<td>Username</td><td>Password</td>
+			</tr><tr>
+			<td><input type='text' name='name_reg'></td>
+			<td><input type='password' name='pass_reg'</td>
+			</tr><tr><td colspan='2'><input type='submit' value='Aggiungi'></table>
+			<input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
+			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'></form></div>
+			";
 	  
 	  echo "<script>
 		$(\"#statusbox\").hide();
