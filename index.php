@@ -14,21 +14,6 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	else {
 		$authorized = false;
 	}
-	if ( $authorized )
-	{
-		if(isset($_REQUEST['action']))
-		{
-			$action = $_REQUEST['action'];
-			if ( $action == "off" )
-			{
-				exec("ruby system/handler.rb deactivate");
-			}
-			if ( $action == "on" )
-			{
-				exec("ruby system/handler.rb activate");
-			}
-		}
-	}		
 }
 ?>
 

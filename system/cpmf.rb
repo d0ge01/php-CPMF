@@ -189,7 +189,6 @@ class CaptivePortal
 		
 		if data.first == "autorize"
 			if ( data[1] != "" )
-			
 				self.autorize(data[1])
 				client.puts "OKS"
 			else
