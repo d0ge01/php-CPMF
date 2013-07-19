@@ -26,6 +26,7 @@ class CaptivePortal
 	end
 	
 	self.resetRules
+	self.defaultRules
 	
 	self.loadDB
 	self.createTable
@@ -45,6 +46,7 @@ class CaptivePortal
 	system("iptables -I INPUT -p tcp –i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
 	system("iptables -I INPUT -p icmp –i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
 	system("iptables -I INPUT -p udp –i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
+	puts "[!] default rules set( iptables )" if self.debug
   end
   
   def loadDB
@@ -77,9 +79,7 @@ class CaptivePortal
   def addNewIpAllowed(ip)
     self.allowedDB << ip
     self.nIpAllowed += 1
-    Thread.new do
-      `#{self.iptables_bin} -s #{ip}`
-    end
+    self.allowConnection(ip)
   end
 
   def banNewIpAllowed(ip)
@@ -202,7 +202,7 @@ class CaptivePortal
 		
 		if data.first == "autorize"
 			if ( data[1] != "" )
-				self.autorize(data[1])
+				self.addNewIpAllowed(data[1])
 				client.puts "OKS"
 			else
 				client.puts "ZERO"
@@ -213,16 +213,13 @@ class CaptivePortal
 			puts "[!!!11] SOMEONE WANT DO RESET OMG"
 			self.deniedDB = []
 			self.allowedDB= []
+			self.resetRules
+			self.defaultRules
 		end
 
 		client.close                # Disconnect from the client
 	  end
 	}
-  end
-  
-  def autorize(ip)
-	self.allowedDB << ip
-	self.allowConnection(ip)
   end
   
   def allowConnection(ip)
