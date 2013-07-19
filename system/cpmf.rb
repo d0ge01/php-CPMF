@@ -15,18 +15,36 @@ class CaptivePortal
 	self.debug = debug == "true" ? true : false
     self.port = port.to_i
 	self.active = false;
-	self.iptables_bin = "/sbin/ipables"
-	self.password = "helloworld"
+	self.iptables_bin = `which iptables`.split('\n').split('\r\n').first
+	
+	self.interface = "eth1"
+	self.network_lan="eth0"
+	
 	
 	if self.debug
 		puts "[+] Informazioni di debug abilitate..."
 	end
+	
+	self.resetRules
 	
 	self.loadDB
 	self.createTable
 	
 	# Always last line of initialize.
 	self.listenAsk
+  end
+  
+  def resetRules
+	system("#{self.iptables_bin} -F")
+	system("#{self.iptables_bin} -F -t nat")
+	system("#{self.iptables_bin} -F -t mangle")
+	puts "[!] Reset rules ( iptables )" if self.debug
+  end
+  
+  def defaultRules
+	system("iptables -I INPUT -p tcp –i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
+	system("iptables -I INPUT -p icmp –i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
+	system("iptables -I INPUT -p udp –i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
   end
   
   def loadDB
@@ -54,11 +72,6 @@ class CaptivePortal
 	rescue
 		self.error('add user error')
 	end
-  end
-  
-  def blockConnection
-	system("#{self.iptables_bin} -A PREROUTING -i #{self.interface} -m tcp -s #{self.network_lan} --dport 80 -j REDIRECT --to-ports 3128 ");
-	# Apache with configuration running on ports 3128
   end
   
   def addNewIpAllowed(ip)
@@ -206,10 +219,16 @@ class CaptivePortal
 	  end
 	}
   end
+  
   def autorize(ip)
 	self.allowedDB << ip
-	# self.allowConnection(ip)
+	self.allowConnection(ip)
   end
+  
+  def allowConnection(ip)
+	system("iptables –A POSTROUTING –t nat –s #{ip} -j MASQUERADE")
+  end
+  
   def deban
     sleep 60*60 # 1 hours
     self.deniedDB = []
