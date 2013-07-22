@@ -233,6 +233,11 @@ class CaptivePortal
 				client.puts "ZERO"
 			end
 		end
+		if data.first == "arm"
+			self.armed = true
+			self.resetRules
+			self.defaultRules
+		end
 		
 		if data.first == "reset"
 			puts "[!!!11] SOMEONE WANT DO RESET OMG"
