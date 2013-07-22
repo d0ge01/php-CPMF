@@ -161,11 +161,13 @@ class CaptivePortal
 		data = client.recv(1024)
 		puts "[!] Data received: #{data.chomp} from #{client.addr.last.to_s} " if self.debug
 		data = data.split(' ')
-		#if data.size > 1 # Wait for a fix , freeze all
-		#	data[1] = data[1].replace('\'','')
-		#	data[2] = data[2].replace('\'','')
-		#end
-		#data.first.lowercase!
+		
+		if client.addr.last.to_s == "::1"
+			local = true
+		else
+			local = false
+		end
+		
 		if data.first == "status"
 			puts "[!] sending status to client" if self.debug
 			client.puts self.status
@@ -201,29 +203,27 @@ class CaptivePortal
 			client.puts self.allowedDB.join(' </br>- ')
 		end
 		
-		if data.first == "banip"
+		if data.first == "banip" and local
 			deniedDB << data[1].to_s
 			puts "#{data[1]} ip banned..." if self.debug
 			client.puts "#{data[1]} ip banned..."
 		end
 		
-		if data.first == "exit"
-			if data[1] == self.password
-				exit
-			end
+		if data.first == "exit" and local
+			exit
 		end
 				
-		if data.first == "register"
+		if data.first == "register" and local
 			if data.size >= 2
 				self.addUser(data[1],data[2])
 			end
 		end
 		
-		if data.first == "power"
+		if data.first == "power" and local
 			self.active = ! self.active
 		end
 		
-		if data.first == "autorize"
+		if data.first == "autorize" and local
 			if ( data[1] != "" )
 				self.addNewIpAllowed(data[1])
 				client.puts "OKS"
@@ -231,13 +231,13 @@ class CaptivePortal
 				client.puts "ZERO"
 			end
 		end
-		if data.first == "arm"
+		if data.first == "arm" and local
 			self.armed = true
 			self.resetRules
 			self.defaultRules
 		end
 		
-		if data.first == "reset"
+		if data.first == "reset" and local
 			puts "[!!!11] SOMEONE WANT DO RESET OMG"
 			self.deniedDB = []
 			self.allowedDB= []
