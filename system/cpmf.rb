@@ -6,7 +6,7 @@ require 'digest'
 # Salvatore Criscione <salvatore@grrlz.net>
 class CaptivePortal
 
-  attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password
+  attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password, :armed
   
   def initialize(port = nil, debug = nil, armed = nil)
     self.allowedDB = []  # Array that contains all ip allowed
