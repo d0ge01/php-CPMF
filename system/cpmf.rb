@@ -8,7 +8,7 @@ class CaptivePortal
 
   attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password, :armed
   
-  def initialize(port = nil, debug = nil, armed = nil)
+  def initialize(debug = nil, armed = nil)
     self.allowedDB = []  # Array that contains all ip allowed
     self.deniedDB = []   # Array that contains all banned ip
 	self.debug = debug == "true" ? true : false
@@ -18,6 +18,7 @@ class CaptivePortal
 	self.interface = "eth1"
 	self.network_lan="eth0"
 	
+	self.readConf
 	
 	if self.debug
 		puts "[+] Informazioni di debug abilitate..."
@@ -33,6 +34,28 @@ class CaptivePortal
 	self.listenAsk
   end
   
+  def readConf
+	begin
+		buff = File.readlines("system/conf/cpmf.conf")
+		buff.each do |line|
+			line = line.split('|')
+			if ( line.first == "PORT" )
+				self.port = line.last.chomp.to_i
+			end
+			
+			if ( line.first == "INTERFACE_INT" )
+				self.interface = line.last.chomp
+			end
+			
+			if ( line.first == "INTERFACE_EXT" )
+				self.network_lan = line.last.chomp
+			end
+		end
+	rescue
+		self.error("Parsing configuration..")
+	end
+  end
+  
   def resetRules
 	system("iptables -F")
 	puts "[!] Reset rules ( iptables )" if self.debug
@@ -40,10 +63,10 @@ class CaptivePortal
   
   def defaultRules
 	if self.armed
-		system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
-		system("iptables -I INPUT -p icmp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
-		system("iptables -I INPUT -p udp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
-		system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 80 -j ACCEPT")
+		system("iptables -I INPUT -p tcp -i #{self.network_lan} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
+		system("iptables -I INPUT -p icmp -i #{self.network_lan} -m state -s 0/0 --state INVALID,NEW -j DROP")
+		system("iptables -I INPUT -p udp -i #{self.network_lan} -m state -s 0/0 --state INVALID,NEW -j DROP")
+		system("iptables -I INPUT -p tcp -i #{self.network_lan} -m state -s 0/0 --dport 80 -j ACCEPT")
 		puts "[!] default rules set( iptables )" if self.debug
 	end
   end
@@ -115,10 +138,13 @@ class CaptivePortal
 	else
 		buff = "<font color='red'>OFFLINE</font>"
 	end
-	"Status: #{buff} </br>\n " + 
+	
+	"Status: #{buff} </br>\n" + 
 	"Ip Allowed: #{self.allowedDB.size}</br>\n" + 
 	"Ip Banned:#{self.deniedDB.size}</br>\n" + 
-	"Server running in the port: #{self.port}</br>\n"
+	"Server running in the port: #{self.port}</br>\n" + 
+	"Using Internal interface: #{self.network_lan}</br>\n" + 
+	"Using External interface: #{self.interface}</br>\n"
   end
   
   def listenAsk
@@ -232,5 +258,5 @@ class CaptivePortal
 end
 
 if ARGV.size >= 2
-	cp = CaptivePortal.new(ARGV.shift, ARGV.shift, ARGV.shift)
+	cp = CaptivePortal.new(ARGV.shift, ARGV.shift)
 end
