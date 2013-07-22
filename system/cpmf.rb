@@ -158,9 +158,7 @@ class CaptivePortal
 	self.active = true;
 	loop {
 	  Thread.start(server.accept) do |client|
-		#port, ip = client.unpack_sockaddr_in(socket.getpeername)
-		ip = "127.0.0.1"
-		port = 12345
+		port, ip = client.unpack_sockaddr_in(client.getpeername)
 		data = client.recv(1024)
 		puts "[!] Data received: #{data} from #{ip} on port #{port}" if self.debug
 		data = data.split(' ')
