@@ -159,7 +159,7 @@ class CaptivePortal
 	loop {
 	  Thread.start(server.accept) do |client|
 		data = client.recv(1024)
-		puts "[!] Data received: #{data}" if self.debug
+		puts "[!] Data received: #{data.chomp} from #{client.addr.last.to_s} " if self.debug
 		data = data.split(' ')
 		#if data.size > 1 # Wait for a fix , freeze all
 		#	data[1] = data[1].replace('\'','')
