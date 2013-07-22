@@ -66,7 +66,8 @@ class CaptivePortal
 		system("iptables -I INPUT -p tcp -i #{self.network_lan} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
 		system("iptables -I INPUT -p icmp -i #{self.network_lan} -m state -s 0/0 --state INVALID,NEW -j DROP")
 		system("iptables -I INPUT -p udp -i #{self.network_lan} -m state -s 0/0 --state INVALID,NEW -j DROP")
-		system("iptables -I INPUT -p tcp -i #{self.network_lan} -m state -s 0/0 --dport 80 -j ACCEPT")
+		system("iptables -I INPUT -p tcp -i #{self.network_lan} -s 0/0 --dport 80 -j ACCEPT")
+		system("iptables -I INPUT -p tcp -i #{self.network_lan} -s 127.0.0.1 --dport #{self.port} -j ACCEPT")
 		puts "[!] default rules set( iptables )" if self.debug
 	end
   end
