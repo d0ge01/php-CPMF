@@ -11,9 +11,8 @@ class CaptivePortal
   def initialize(port, debug)
     self.allowedDB = []  # Array that contains all ip allowed
     self.deniedDB = []   # Array that contains all banned ip
-	self.blockConnection
 	self.debug = debug == "true" ? true : false
-    self.port = port.to_i
+    self.port = 12345
 	self.active = false;
 	self.iptables_bin = `which iptables`.split('\n').split('\r\n').first
 	
@@ -29,7 +28,7 @@ class CaptivePortal
 	self.defaultRules
 	
 	self.loadDB
-	self.createTable
+	self.createTable 
 	
 	# Always last line of initialize.
 	self.listenAsk
@@ -43,9 +42,9 @@ class CaptivePortal
   end
   
   def defaultRules
-	system("iptables -I INPUT -p tcp –i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
-	system("iptables -I INPUT -p icmp –i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
-	system("iptables -I INPUT -p udp –i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
+	system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
+	system("iptables -I INPUT -p icmp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
+	system("iptables -I INPUT -p udp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
 	puts "[!] default rules set( iptables )" if self.debug
   end
   
@@ -136,7 +135,8 @@ class CaptivePortal
 	loop {
 	  Thread.start(server.accept) do |client|
 		data = client.recv(1024)
-		puts "[!] Data received: #{data}" if self.debug
+		port, ip = client.unpack_sockaddr_in(socket.getpeername)
+		puts "[!] Data received: #{data} from #{ip} on port #{port}" if self.debug
 		data = data.split(' ')
 		#if data.size > 1 # Wait for a fix , freeze all
 		#	data[1] = data[1].replace('\'','')
@@ -223,7 +223,7 @@ class CaptivePortal
   end
   
   def allowConnection(ip)
-	system("iptables –A POSTROUTING –t nat –s #{ip} -j MASQUERADE")
+	system("iptables -A POSTROUTING -t nat -s #{ip} -j MASQUERADE")
   end
   
   def deban
