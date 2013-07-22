@@ -8,14 +8,13 @@ class CaptivePortal
 
   attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password
   
-  def initialize(port = nil, debug = nil)
+  def initialize(port = nil, debug = nil, armed = nil)
     self.allowedDB = []  # Array that contains all ip allowed
     self.deniedDB = []   # Array that contains all banned ip
 	self.debug = debug == "true" ? true : false
     self.port = port != nil ? port.to_i : 12345
 	self.active = false;
-	self.iptables_bin = `which iptables`.split('\n')	.first
-	
+	self.armed = armed == "true" ? true : false
 	self.interface = "eth1"
 	self.network_lan="eth0"
 	
@@ -35,18 +34,18 @@ class CaptivePortal
   end
   
   def resetRules
-	system("#{self.iptables_bin} -F")
-	system("#{self.iptables_bin} -F -t nat")
-	system("#{self.iptables_bin} -F -t mangle")
+	system("iptables -F")
 	puts "[!] Reset rules ( iptables )" if self.debug
   end
   
   def defaultRules
-	system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
-	system("iptables -I INPUT -p icmp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
-	system("iptables -I INPUT -p udp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
-	system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 80 -j ACCEPT")
-	puts "[!] default rules set( iptables )" if self.debug
+	if self.armed
+		system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
+		system("iptables -I INPUT -p icmp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
+		system("iptables -I INPUT -p udp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
+		system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 80 -j ACCEPT")
+		puts "[!] default rules set( iptables )" if self.debug
+	end
   end
   
   def loadDB
@@ -85,9 +84,6 @@ class CaptivePortal
   def banNewIpAllowed(ip)
     self.deniedDB << ip
     self.nIpBanned += 1
-    Thread.new do
-      self.deban(ip)
-    end
   end
 
   def checkLogin(email, password)
@@ -135,8 +131,8 @@ class CaptivePortal
 	self.active = true;
 	loop {
 	  Thread.start(server.accept) do |client|
-		data = client.recv(1024)
 		port, ip = client.unpack_sockaddr_in(socket.getpeername)
+		data = client.recv(1024)
 		puts "[!] Data received: #{data} from #{ip} on port #{port}" if self.debug
 		data = data.split(' ')
 		#if data.size > 1 # Wait for a fix , freeze all
@@ -227,12 +223,6 @@ class CaptivePortal
 	system("iptables -A POSTROUTING -t nat -s #{ip} -j MASQUERADE")
   end
   
-  def deban
-    sleep 60*60 # 1 hours
-    self.deniedDB = []
-	#self.rebuildDB
-  end
-  
   def error(txt)
 	puts "[-] Error: #{txt}"
 	exit
@@ -240,5 +230,5 @@ class CaptivePortal
 end
 
 if ARGV.size >= 2
-	cp = CaptivePortal.new(ARGV.shift, ARGV.shift)
+	cp = CaptivePortal.new(ARGV.shift, ARGV.shift, ARGV.shift)
 end
