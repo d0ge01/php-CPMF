@@ -14,7 +14,7 @@ class CaptivePortal
 	self.debug = debug == "true" ? true : false
     self.port = port != nil ? port.to_i : 12345
 	self.active = false;
-	self.iptables_bin = `which iptables`.split('\n').first
+	self.iptables_bin = `which iptables`.split('\n')	.first
 	
 	self.interface = "eth1"
 	self.network_lan="eth0"
@@ -45,6 +45,7 @@ class CaptivePortal
 	system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 1:65535 --state INVALID,NEW -j DROP")
 	system("iptables -I INPUT -p icmp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
 	system("iptables -I INPUT -p udp -i #{self.interface} -m state -s 0/0 --state INVALID,NEW -j DROP")
+	system("iptables -I INPUT -p tcp -i #{self.interface} -m state -s 0/0 --dport 80 -j ACCEPT")
 	puts "[!] default rules set( iptables )" if self.debug
   end
   
