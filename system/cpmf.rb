@@ -158,9 +158,8 @@ class CaptivePortal
 	self.active = true;
 	loop {
 	  Thread.start(server.accept) do |client|
-		port, ip = client.unpack_sockaddr_in(client.getpeername)
 		data = client.recv(1024)
-		puts "[!] Data received: #{data} from #{ip} on port #{port}" if self.debug
+		puts "[!] Data received: #{data}" if self.debug
 		data = data.split(' ')
 		#if data.size > 1 # Wait for a fix , freeze all
 		#	data[1] = data[1].replace('\'','')
