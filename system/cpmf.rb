@@ -8,13 +8,13 @@ class CaptivePortal
 
   attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password
   
-  def initialize(port, debug)
+  def initialize(port = nil, debug = nil)
     self.allowedDB = []  # Array that contains all ip allowed
     self.deniedDB = []   # Array that contains all banned ip
 	self.debug = debug == "true" ? true : false
-    self.port = 12345
+    self.port = port != nil ? port.to_i : 12345
 	self.active = false;
-	self.iptables_bin = `which iptables`.split('\n').split('\r\n').first
+	self.iptables_bin = `which iptables`.split('\n').first
 	
 	self.interface = "eth1"
 	self.network_lan="eth0"
