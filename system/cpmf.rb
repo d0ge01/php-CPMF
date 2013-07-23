@@ -24,8 +24,8 @@ class CaptivePortal
     self.port = port != nil ? port.to_i : 12345
 	self.active = false;
 	self.armed = armed == "true" ? true : false
-	self.interface = "eth1"			# Default
-	self.network_lan="eth0"			# Default
+	self.interface = "eth1"			# Default interface
+	self.network_lan="eth0"			# Default interface
 	
 	self.readConf
 	
@@ -37,7 +37,7 @@ class CaptivePortal
 	self.loadDB
 	self.createTable 
 	
-	# Always last line of initialize.
+	# This will be always last line of initialize.
 	self.listenAsk
   end
   
@@ -57,6 +57,7 @@ class CaptivePortal
 			if ( line.first == "INTERFACE_EXT" )
 				self.network_lan = line.last.chomp
 			end
+			
 		end
 	rescue
 		puts("[-] Error: Parsing configuration.. switching to default")
