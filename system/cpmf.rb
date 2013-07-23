@@ -17,11 +17,11 @@ class CaptivePortal
   
   def initialize(debug = nil, armed = nil)
   
-    self.allowedDB = []  # Array that contains all ip allowed
-    self.deniedDB = []   # Array that contains all banned ip
+    self.allowedDB = [ '127.0.0.1' ]  # Array that contains all ip allowed
+    self.deniedDB = [ ]   # Array that contains all banned ip
 	
 	self.debug = debug == "true" ? true : false
-    self.port = port != nil ? port.to_i : 12345
+    self.port = 12345
 	self.active = false;
 	self.armed = armed == "true" ? true : false
 	self.interface = "eth1"			# Default interface
@@ -34,10 +34,10 @@ class CaptivePortal
 	self.resetRules
 	self.defaultRules
 	
-	self.rebuildRules
-	
 	self.loadDB
 	self.createTable 
+	
+	self.rebuildRules
 	
 	# This will be always last line of initialize.
 	self.listenAsk
@@ -174,6 +174,12 @@ class CaptivePortal
 	end
   end
   
+  def userNumber
+	puts "[!] Counting users in DB " if self.debug
+	rs = self.db.execute"SELECT * FROM logindata"
+	rs.size
+  end
+  
   def status
 	buff = ""
 	if self.active
@@ -270,9 +276,14 @@ class CaptivePortal
 				self.addNewIpAllowed(data[1])
 				client.puts "OKS"
 			else
-				client.puts "ZERO"
+				client.puts "FAIL"
 			end
 		end
+		
+		if data.first == "usercount"
+			client.puts self.userNumber
+		end
+		
 		if data.first == "arm" and local
 			self.armed = true
 			self.resetRules
