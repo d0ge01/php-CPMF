@@ -102,7 +102,9 @@ class CaptivePortal
   def addNewIpAllowed(ip)
     self.allowedDB << ip
     self.nIpAllowed += 1
-    self.allowConnection(ip)
+	if self.arm
+		self.allowConnection(ip)
+	end
   end
 
   def banNewIpAllowed(ip)

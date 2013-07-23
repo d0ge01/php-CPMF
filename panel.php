@@ -1,7 +1,7 @@
 <?php
 $logged = false;
 $authorized = false;
-
+/*
 if(isset($_REQUEST['done']))
 {
 	$done = $_REQUEST['done'];
@@ -10,7 +10,7 @@ else
 {
 	$done = "";
 }
-
+*/
 if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
 	$email = $_REQUEST['email'];
@@ -19,8 +19,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	if ( $out == "OK" )
 	{
 		$authorized = true;
-		$done = $done + "</br>Logged as admin";
-		exec("ruby system/handler.rb autorize " . $_SERVER['REMOTE_ADDR'] );
+		//$done = $done + "</br>Logged as admin";
 	}
 	else {
 		$authorized = false;
@@ -33,7 +32,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 			if ( $action == "off" )
 			{
 				exec("ruby system/handler.rb power");
-				$done = $done + "</br>Power toggle";
+				//$done = $done + "</br>Power toggle";
 			}
 			if ( $action == "banip" && isset($_REQUEST['ban_ip']))
 			{
@@ -41,7 +40,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 				if ( $ip != "" ) 
 				{
 					exec("ruby system/handler.rb banip $ip");
-					$done = $done + "</br>Banned ip: $ip";
+					//$done = $done + "</br>Banned ip: $ip";
 				}
 			}
 			
@@ -52,7 +51,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 				if ( $name != "" )
 				{
 					exec("ruby system/handler.rb register $name $pass");
-					$done = $done + "</br>added user $name";
+					//$done = $done + "</br>added user $name";
 				}
 			}
 		}
@@ -109,8 +108,8 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<div id='control' class='box'>";
 	  echo "<table><tr><td><form method='post'><input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
 			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'>
-			<input type='hidden' name='action' value='off'><input type='submit' value='Spegni'>" .
-			"<input type='hidden' name='done' value='$done'>" . 
+			<input type='hidden' name='action' value='off'><input type='submit' value='Spegni'>" . 
+			// "<input type='hidden' name='done' value='$done'>" . 
 			"</form></td>
 			</tr></table>
 			<table><tr><td><form method='post'><input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
@@ -120,7 +119,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 			<td colspan='2'>Banna Ip:</td>
 			<td><input type='text' name='ban_ip'></td>
 			</tr></table>" .
-			"<input type='hidden' name='done' value='$done'>" .
+			// "<input type='hidden' name='done' value='$done'>" .
 			"</form></br>
 			<form method='post'><input type='hidden' name='action' value='register'></br>New User</br>
 			<table><tr>
@@ -130,8 +129,8 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 			<td><input type='password' name='pass_reg'</td>
 			</tr><tr><td colspan='2'><input type='submit' value='Aggiungi'></table>
 			<input type='hidden' name='email' value='" . $_REQUEST['email'] . "'>
-			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'>" . "
-			<input type='hidden' name='done' value='$done'> " . 
+			<input type='hidden' name='password' value='" . $_REQUEST['password'] . "'>" . /*"
+			<input type='hidden' name='done' value='$done'> " . */
 			"</form></div>
 			";
 	  
@@ -157,7 +156,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
   <div id="console">
 	Console: 
 	<?php
-		echo $done;
+		// echo $done;
 	?>
   </div>
   </center>
