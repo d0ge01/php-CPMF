@@ -3,26 +3,33 @@ require 'sqlite3'
 require 'socket'
 require 'digest/sha1'
 
-# Salvatore Criscione <salvatore@grrlz.net>
+# Salvatore  Criscione     <salvatore@grrlz.net>
+# License:	DO U WANT PIRATE FREE U ARE A PIRATE
+# Date:		2013-2014
+# Description:
+#			This is simple captive portal using
+#			Client-server programming by Ruby and
+#			PHP, nothing advance
+
 class CaptivePortal
 
   attr_accessor :port, :iptables_bin, :allowedDB, :deniedDB, :interface, :network_lan, :active, :server, :db, :debug, :password, :armed
   
   def initialize(debug = nil, armed = nil)
+  
     self.allowedDB = []  # Array that contains all ip allowed
     self.deniedDB = []   # Array that contains all banned ip
+	
 	self.debug = debug == "true" ? true : false
     self.port = port != nil ? port.to_i : 12345
 	self.active = false;
 	self.armed = armed == "true" ? true : false
-	self.interface = "eth1"
-	self.network_lan="eth0"
+	self.interface = "eth1"			# Default
+	self.network_lan="eth0"			# Default
 	
 	self.readConf
 	
-	if self.debug
-		puts "[+] Informazioni di debug abilitate..."
-	end
+	puts "[+] Informazioni di debug abilitate..." if self.debug
 	
 	self.resetRules
 	self.defaultRules
@@ -52,13 +59,21 @@ class CaptivePortal
 			end
 		end
 	rescue
-		self.error("Parsing configuration..")
+		puts("[-] Error: Parsing configuration.. switching to default")
+		self.port = 12345
+		puts "[!] Using default port 12345... ") if self.debug
+		self.interface = "eth0"
+		puts "[!] Using wan interface eth0... ") if self.debug
+		self.network_lan = "eth1"
+		puts "[!] Using lan interface eth1... ") if self.debug
 	end
   end
   
   def resetRules
-	system("iptables -F")
-	puts "[!] Reset rules ( iptables )" if self.debug
+	if self.arm
+		system("iptables -F")
+		puts "[!] Reset rules ( iptables )" if self.debug
+	end
   end
   
   def defaultRules
@@ -100,10 +115,14 @@ class CaptivePortal
   end
   
   def addNewIpAllowed(ip)
-    self.allowedDB << ip
-    self.nIpAllowed += 1
-	if self.arm
-		self.allowConnection(ip)
+	if self.deniedDB.include? ip
+		puts "[!] Banned Ip made request. " if self.debug
+	else
+		self.allowedDB << ip
+		self.nIpAllowed += 1
+		if self.arm
+			self.allowConnection(ip)
+		end
 	end
   end
 
@@ -237,14 +256,17 @@ class CaptivePortal
 			self.armed = true
 			self.resetRules
 			self.defaultRules
+			client.puts "ARMED"
 		end
 		
 		if data.first == "reset" and local
 			puts "[!!!11] SOMEONE WANT DO RESET OMG"
 			self.deniedDB = []
 			self.allowedDB= []
+			puts "[!] It's almost useless with arm disable :/ " if !self.arm
 			self.resetRules
 			self.defaultRules
+			client.puts "RESET"
 		end
 
 		client.close                # Disconnect from the client
@@ -264,4 +286,6 @@ end
 
 if ARGV.size >= 2
 	cp = CaptivePortal.new(ARGV.shift, ARGV.shift)
+else
+	cp = CaptivePortal.new("true", "false")
 end
