@@ -1,15 +1,23 @@
 <?php
+
+/*
+	This file is a part of CPMF
+*/
+
 $logged = false;
 $authorized = false;
+$host =  "localhost 12345"
+
+
 if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
 	$email = $_REQUEST['email'];
 	$passw = $_REQUEST['password'];
-	$out = exec("ruby system/handler.rb login \"$email\" \"$passw\"");
+	$out = exec("ruby system/handler.rb $host login \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
 		$authorized = true;
-		exec("ruby system/handler.rb autorize " . $_SERVER['REMOTE_ADDR'] );
+		exec("ruby system/handler.rb $host autorize " . $_SERVER['REMOTE_ADDR'] );
 	}
 	else {
 		$authorized = false;

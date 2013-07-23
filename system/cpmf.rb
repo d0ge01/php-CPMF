@@ -34,11 +34,23 @@ class CaptivePortal
 	self.resetRules
 	self.defaultRules
 	
+	self.rebuildRules
+	
 	self.loadDB
 	self.createTable 
 	
 	# This will be always last line of initialize.
 	self.listenAsk
+  end
+  
+  def rebuildRules
+	self.allowedDB.each do |ip|
+		self.addNewIpAllowed(ip)
+	end
+	
+	self.deniedDB.each do |ip|
+		self.banNewIpAllowed(ip)
+	end
   end
   
   def readConf
@@ -56,6 +68,14 @@ class CaptivePortal
 			
 			if ( line.first == "INTERFACE_EXT" )
 				self.network_lan = line.last.chomp
+			end
+			
+			if ( line.first == "ALLOWIP" )
+				self.allowedDB << line.last.chomp
+			end
+			
+			if ( line.first == "BANIP" )
+				self.deniedDB << line.last.chomp
 			end
 			
 		end

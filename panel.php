@@ -1,6 +1,13 @@
 <?php
+
+/*
+	This file is a part of CPMF
+*/
+
 $logged = false;
 $authorized = false;
+$host =  "localhost 12345"
+
 /*
 if(isset($_REQUEST['done']))
 {
@@ -15,7 +22,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 {
 	$email = $_REQUEST['email'];
 	$passw = $_REQUEST['password'];
-	$out = exec("ruby system/handler.rb adminlogin \"$email\" \"$passw\"");
+	$out = exec("ruby system/handler.rb $host adminlogin \"$email\" \"$passw\"");
 	if ( $out == "OK" )
 	{
 		$authorized = true;
@@ -31,7 +38,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 			$action = $_REQUEST['action'];
 			if ( $action == "off" )
 			{
-				exec("ruby system/handler.rb power");
+				exec("ruby system/handler.rb $host power");
 				//$done = $done + "</br>Power toggle";
 			}
 			if ( $action == "banip" && isset($_REQUEST['ban_ip']))
@@ -39,7 +46,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 				$ip = $_REQUEST['ban_ip'];
 				if ( $ip != "" ) 
 				{
-					exec("ruby system/handler.rb banip $ip");
+					exec("ruby system/handler.rb $host banip $ip");
 					//$done = $done + "</br>Banned ip: $ip";
 				}
 			}
@@ -50,7 +57,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 				$pass = $_REQUEST['pass_reg'];
 				if ( $name != "" )
 				{
-					exec("ruby system/handler.rb register $name $pass");
+					exec("ruby system/handler.rb $host register $name $pass");
 					//$done = $done + "</br>added user $name";
 				}
 			}
@@ -77,7 +84,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<a href='javascript:$(\"#statusbox\").toggle(\"slow\")'>Status</a></br>";
 	  echo "<div id='statusbox' class='box'>";
       $out = Array();
-	  exec("ruby system/handler.rb status", $out);
+	  exec("ruby system/handler.rb $host status", $out);
 	  foreach($out as $line)
 	  {
 		echo $line;
@@ -88,7 +95,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<a href='javascript:$(\"#ipBanned\").toggle(\"slow\")'>ip Banned</a></br>";
 	  echo "<div id='ipBanned' class='box'>";
 	  echo "Lista ip bannati: </br>- ";
-	  exec("ruby system/handler.rb ipbanned", $out);
+	  exec("ruby system/handler.rb $host ipbanned", $out);
 	  foreach($out as $line)
 	  {
 		echo $line;
@@ -98,7 +105,7 @@ if ( isset($_REQUEST['email']) && isset($_REQUEST['password']) )
 	  echo "<div id='ipAllowed' class='box'>";
 	  echo "Lista ip permessi: </br>- ";
 	  $out = Array();
-	  exec("ruby system/handler.rb ipallowed", $out);
+	  exec("ruby system/handler.rb $host ipallowed", $out);
 	  foreach($out as $line)
 	  {
 		echo $line;
