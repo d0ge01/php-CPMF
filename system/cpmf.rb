@@ -1,7 +1,7 @@
 #!/usb/bin/env ruby
 require 'sqlite3'
 require 'socket'
-require 'digest'
+require 'digest/sha1'
 
 # Salvatore Criscione <salvatore@grrlz.net>
 class CaptivePortal
@@ -92,7 +92,7 @@ class CaptivePortal
   
   def addUser(email, password)
 	begin
-		self.db.execute "INSERT INTO logindata VALUES('#{email}','#{Digest::MD5.hexdigest(password).to_s}',null)"
+		self.db.execute "INSERT INTO logindata VALUES('#{email}','#{Digest::SHA1.hexdigest(password).to_s}',null)"
 		puts "[!] Added User #{email},#{password} to database" if self.debug
 	rescue
 		self.error('add user error')
@@ -112,7 +112,7 @@ class CaptivePortal
 
   def checkLogin(email, password)
 	puts "[!] Login checker activated: email = #{email} , password = #{password}" if self.debug
-	rs = self.db.execute"SELECT * FROM logindata WHERE email='#{email}' AND password='#{Digest::MD5.hexdigest(password).to_s}'"
+	rs = self.db.execute"SELECT * FROM logindata WHERE email='#{email}' AND password='#{Digest::SHA1.hexdigest(password).to_s}'"
 	puts "Returned #{rs.size} rows.." if self.debug
 	if rs.size == 0
 		return false
@@ -123,7 +123,7 @@ class CaptivePortal
   
   def checkLoginAdmin(email, password)
 	puts "[!] Login checker activated: email = #{email} , password = #{password}" if self.debug
-	rs = self.db.execute"SELECT * FROM logindata WHERE email='#{email}' AND password='#{Digest::MD5.hexdigest(password).to_s}' AND id='1'"
+	rs = self.db.execute"SELECT * FROM logindata WHERE email='#{email}' AND password='#{Digest::SHA1.hexdigest(password).to_s}' AND id='1'"
 	puts "Returned #{rs.size} rows.." if self.debug
 	if rs.size == 0
 		return false
