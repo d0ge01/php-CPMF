@@ -91,7 +91,7 @@ class CaptivePortal
   end
   
   def resetRules
-	if self.arm
+	if self.armed
 		system("iptables -F")
 		puts "[!] Reset rules ( iptables )" if self.debug
 	end
@@ -141,7 +141,7 @@ class CaptivePortal
 	else
 		self.allowedDB << ip
 		self.nIpAllowed += 1
-		if self.arm
+		if self.armed
 			self.allowConnection(ip)
 		end
 	end
@@ -295,7 +295,7 @@ class CaptivePortal
 			puts "[!!!11] SOMEONE WANT DO RESET OMG"
 			self.deniedDB = []
 			self.allowedDB= []
-			puts "[!] It's almost useless with arm disable :/ " if !self.arm
+			puts "[!] It's almost useless with arm disable :/ " if !self.armed
 			self.resetRules
 			self.defaultRules
 			client.puts "RESET"
