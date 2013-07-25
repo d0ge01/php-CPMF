@@ -22,6 +22,10 @@ if ( isset($_REQUEST['hash']) )
 		{
 			$buff = "Email confirmed";
 		}
+		if ( $out == "FAIL" )
+		{
+			$buff = "Something wrong with verification, plz retry";
+		}
 	}
 }
 ?>
@@ -41,12 +45,11 @@ if ( isset($_REQUEST['hash']) )
 	<?php
 		if ( $todo == 0 )
 		{
-			echo '
-	Verification Page 
-	<form method="post">
-		Hash: <input type="text" name="hash">
-		<input type="submit" value="Verify">
-	</form>';
+			echo 'Verification Page ' .
+				 '<form method="post"> ' .
+				 '   Hash: <input type="text" name="hash"> ' . 
+				 '   <input type="submit" value="Verify">' .
+				 '</form>';
 		}
 		else
 		{
