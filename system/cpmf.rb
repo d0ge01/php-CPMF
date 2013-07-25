@@ -27,6 +27,15 @@ class CaptivePortal
 	self.interface = "eth1"			# Default interface
 	self.network_lan="eth0"			# Default interface
 	
+	self.alpha = ('a'..'z').to_a
+	('A'..'Z').to_a.each do |ch|
+		self.alpha << ch
+	end
+	
+	('0'..'9').to_a.each do |ch|
+		self.alpha << ch
+	end
+	
 	self.readConf
 	
 	puts "[+] Informazioni di debug abilitate..." if self.debug
@@ -51,6 +60,14 @@ class CaptivePortal
 	self.deniedDB.each do |ip|
 		self.banNewIpAllowed(ip)
 	end
+  end
+  
+  def genRandomHash
+	word = ""
+	30.times do
+		word = word + self.alpha[random(self.alpha.size)]
+	end
+	Digest::SHA1.hexdigest(word).to_s
   end
   
   def readConf
@@ -119,7 +136,7 @@ class CaptivePortal
   
   def createTable
 	begin
-		self.db.execute "CREATE TABLE IF NOT EXISTS logindata (email TEXT, password TEXT, Id INTEGER PRIMARY KEY AUTOINCREMENT)"
+		self.db.execute "CREATE TABLE IF NOT EXISTS logindata (email TEXT, userhash TEXT, password TEXT, active INT, id INTEGER PRIMARY KEY AUTOINCREMENT)"
 		puts "[!] Created table if not exists" if self.debug
 	rescue
 		self.error('create table error')
@@ -128,10 +145,23 @@ class CaptivePortal
   
   def addUser(email, password)
 	begin
-		self.db.execute "INSERT INTO logindata VALUES('#{email}','#{Digest::SHA1.hexdigest(password).to_s}',null)"
+		self.db.execute "INSERT INTO logindata VALUES('#{email}','#{self.genRandomHash}','#{Digest::SHA1.hexdigest(password).to_s}', '0', null)"
 		puts "[!] Added User #{email},#{password} to database" if self.debug
 	rescue
 		self.error('add user error')
+	end
+  end
+  
+  def verify(hash)
+	begin
+		rs = self.db.execute "UPDATE logindata SET active='1' WHERE userhash='#{hash.to_s}'"
+		if rs.size == 0
+			return "NOONE"
+		else
+			return "OK"
+		end
+	rescue
+		self.error('verify someone..')
 	end
   end
   
@@ -154,7 +184,7 @@ class CaptivePortal
 
   def checkLogin(email, password)
 	puts "[!] Login checker activated: email = #{email} , password = #{password}" if self.debug
-	rs = self.db.execute"SELECT * FROM logindata WHERE email='#{email}' AND password='#{Digest::SHA1.hexdigest(password).to_s}'"
+	rs = self.db.execute "SELECT * FROM logindata WHERE email='#{email}' AND active='1' AND password='#{Digest::SHA1.hexdigest(password).to_s}'"
 	puts "Returned #{rs.size} rows.." if self.debug
 	if rs.size == 0
 		return false
@@ -291,6 +321,10 @@ class CaptivePortal
 			client.puts "ARMED"
 		end
 		
+		if data.first == "verify"
+			if ( data[1] != "" )
+				client.puts self.verify(data[1])
+		
 		if data.first == "reset" and local
 			puts "[!!!11] SOMEONE WANT DO RESET OMG"
 			self.deniedDB = []
@@ -312,7 +346,7 @@ class CaptivePortal
   
   def error(txt)
 	puts "[-] Error: #{txt}"
-	exit
+	# exit // Do not exit, this is server
   end
 end
 
