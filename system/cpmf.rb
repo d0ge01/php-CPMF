@@ -324,6 +324,10 @@ class CaptivePortal
 		if data.first == "verify"
 			if ( data[1] != "" )
 				client.puts self.verify(data[1])
+			else
+				client.puts "FAIL"
+			end
+		end
 		
 		if data.first == "reset" and local
 			puts "[!!!11] SOMEONE WANT DO RESET OMG"
