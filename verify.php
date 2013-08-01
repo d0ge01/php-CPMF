@@ -10,7 +10,7 @@ $buff = ""
 if ( isset($_REQUEST['hash']) )
 {
 	$todo = 1;
-	$hash = $_REQUEST['hash'];
+	$hash = $_REQUEST['hash'];	
 	
 	$out = exec("ruby system/handler.rb $host verify $hash");
 	if ( $out == "NOONE" )

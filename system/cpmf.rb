@@ -242,8 +242,10 @@ class CaptivePortal
 		
 		if client.addr.last.to_s == "::1"
 			local = true
+			from = "::1"
 		else
 			local = false
+			from = client.addr.last.to_s
 		end
 		
 		if data.first == "status"
@@ -254,6 +256,7 @@ class CaptivePortal
 		if data.first == "login"
 			if(self.checkLogin(data[1],data[2]))
 				puts "[!] Login OK" if self.debug
+				self.addNewIpAllowed(data[1])
 				client.puts "OK"
 			else
 				puts "[!] Login FAIL" if self.debug
@@ -265,6 +268,7 @@ class CaptivePortal
 		if data.first == "adminlogin"
 			if(self.checkLoginAdmin(data[1],data[2]))
 				puts "[!] Login OK" if self.debug
+				self.addNewIpAllowed(data[1])
 				client.puts "OK"
 			else
 				puts "[!] Login FAIL" if self.debug
@@ -273,11 +277,11 @@ class CaptivePortal
 			client.puts "END"
 		end
 		
-		if data.first == "ipbanned"
+		if data.first == "ipbanned" and local
 			client.puts self.deniedDB.join(' </br>- ')
 		end
 		
-		if data.first == "ipallowed"
+		if data.first == "ipallowed" and local
 			client.puts self.allowedDB.join(' </br>- ')
 		end
 		
@@ -299,15 +303,6 @@ class CaptivePortal
 		
 		if data.first == "power" and local
 			self.active = ! self.active
-		end
-		
-		if data.first == "autorize" and local
-			if ( data[1] != "" )
-				self.addNewIpAllowed(data[1])
-				client.puts "OKS"
-			else
-				client.puts "FAIL"
-			end
 		end
 		
 		if data.first == "usercount"
